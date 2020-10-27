@@ -23,6 +23,7 @@ import lib.network as network
 from torch.optim import lr_scheduler
 from lib.utils.configuration import cfg as args
 from lib.utils.configuration import cfg_from_file, format_dict
+from lib.utils import epoch_func
 
 
 def fix_seed(seed=0):
@@ -85,6 +86,10 @@ def train():
 
     msglogger.info("#"*30)
 
+    """
+    add dataset and data loader here
+    """
+
     if args.debug:
         args.TRAIN.total_epoch = 500
         args.LOG.train_print_iter = 1
@@ -138,15 +143,72 @@ def train():
 
         args.lr = args.OPTIM.lr
 
-        for epoch in range(args.TRAIN.start_eopch, args.TRAIN.total_epoch+1):
-            pass
+        best_score = -1
+        best_iter = -1
 
+        train_since = time.time()
+
+        for epoch in range(args.TRAIN.start_eopch, args.TRAIN.total_epoch+1):
+            trn_info = epoch_func.train_epoch(
+                wrappered_model=wrapper, 
+                train_loader=train_loader,
+                optimizer=optimizer,
+                epoch=epoch,
+                args=args,
+                logger=trn_logger
+            )
+
+            val_info = epoch_func.valid_epoch(
+                wrappered_model=wrapper, 
+                train_loader=valid_loader,
+                epoch=epoch,
+                args=args,
+                logger=trn_logger
+            )
+
+            score = val_info[args.TEST.metric_name]
+            iter_end = time.time() - train_since
+            msg = "Epoch:[{}/{}] lr:{} elapsed_time:{:.4f}s mean epoch time:{:.4f}s".format(epoch,
+                                                                                            args.TRAIN.total_epoch, lr, iter_end, iter_end/(epoch-args.TRAIN.start_epoch+1))
+            msglogger.info(msg)
+
+            msg = "Valid: "
+            for name, value in val_info.items():
+                msg += "{}:{:.4f} ".format(name, value)
+            msglogger.info(msg)
+
+            msg = "TRAIN: "
+            for name, value in trn_info.items():
+                msg += "{}:{:.4f} ".format(name, value)
+            msglogger.info(msg)
+
+            is_best = best_score < score
+            if is_best:
+                best_score = score
+                best_iter = epoch
+            network.model_io.save_model(wrapper, optimizer, val_info, is_best, epoch,
+                                        logger=msglogger, multi_gpus=args.multi_gpus,
+                                        model_save_dir=args.MODEL.save_dir, delete_old=args.MODEL.delete_old,
+                                        fp16_train=args.TRAIN.fp16, amp=amp)
+            if scheduler is not None:
+                if args.OPTIM.lr_scheduler == 'patience':
+                    scheduler.step(score)
+                elif args.OPTIM.lr_scheduler == "multi-step":
+                    scheduler.step()
+                else:
+                    raise NotImplementedError
             """
             add  
             network.model_io.save_model(wrapper, optimizer, score, is_best, epoch, 
                                         logger=msglogger, multi_gpus=args.multi_gpus, 
                                         model_save_dir=args.model_save_dir, delete_old=args.delete_old)
-            """            
+            """
+            if args.debug:
+                if epoch >= 2:
+                    break
+
+        msglogger.info("Best Iter = {} loss={:.4f}".format(
+            best_iter, best_score))       
 
 
 if __name__ == "__main__":

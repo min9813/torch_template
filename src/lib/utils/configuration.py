@@ -38,6 +38,8 @@ __C.MODEL.resume_net_path = ""
 __C.MODEL.resume_opt_path = ""
 __C.MODEL.resume = False
 
+__C.TEST.metric_name = ""
+
 __C.debug = True
 __C.run_mode = "train"
 __C.seed = 1234
@@ -45,6 +47,7 @@ __C.gpus = "0"
 __C.use_multi_gpu = False
 __C.is_cpu = False
 __C.cuda_id = 0
+
 
 def format_dict(cfg):
     ng_names = []
