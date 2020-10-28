@@ -43,8 +43,8 @@ def iter_func(wrappered_model, data, args, meter, since, optimizer=None):
     if is_train:
         meter.add_value("time_f", time.time()-since)
         since = time.time()
-        if args.TRAIN.fp16:
-            with amp.scale_loss(loss, [optimizer]) as scaled_loss:
+        if args.fp16:
+            with amp.scale_loss(loss, optimizer) as scaled_loss:
                 scaled_loss.backward()
         # loss.backward()
         else:
@@ -58,9 +58,7 @@ def iter_func(wrappered_model, data, args, meter, since, optimizer=None):
 
 def train_epoch(wrappered_model, train_loader, optimizer, epoch, args, logger=None):
     wrappered_model.train()
-    wrappered_model.model.eval()
     meter = average_meter.AverageMeter()
-    train_loader.dataset.set_train()
 
     iter_num = len(train_loader)
     iter_since = time.time()
@@ -96,7 +94,6 @@ def valid_epoch(wrappered_model, train_loader, epoch, args, logger=None):
     wrappered_model.eval()
 
     meter = average_meter.AverageMeter()
-    train_loader.dataset.set_train()
     iter_num = len(train_loader)
     iter_since = time.time()
     since = iter_since

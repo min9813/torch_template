@@ -16,6 +16,9 @@ __C.DATA = edict()
 __C.LOG = edict()
 __C.MODEL = edict()
 
+__C.DATA.input_w = 0
+__C.DATA.input_h = 0
+
 __C.TRAIN.total_epoch = 100
 __C.TRAIN.start_epoch = 1
 
@@ -37,6 +40,7 @@ __C.MODEL.save_dir = "../models"
 __C.MODEL.resume_net_path = ""
 __C.MODEL.resume_opt_path = ""
 __C.MODEL.resume = False
+__C.MODEL.delete_old = True
 
 __C.TEST.metric_name = ""
 

@@ -53,4 +53,4 @@ class Template(torch.utils.data.Dataset):
         return data
 
     def __len__(self):
-        pass
+        return len(self.annotations)

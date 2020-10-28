@@ -148,7 +148,7 @@ def train():
 
         train_since = time.time()
 
-        for epoch in range(args.TRAIN.start_eopch, args.TRAIN.total_epoch+1):
+        for epoch in range(args.TRAIN.start_epoch, args.TRAIN.total_epoch+1):
             trn_info = epoch_func.train_epoch(
                 wrappered_model=wrapper, 
                 train_loader=train_loader,
@@ -189,7 +189,7 @@ def train():
             network.model_io.save_model(wrapper, optimizer, val_info, is_best, epoch,
                                         logger=msglogger, multi_gpus=args.multi_gpus,
                                         model_save_dir=args.MODEL.save_dir, delete_old=args.MODEL.delete_old,
-                                        fp16_train=args.TRAIN.fp16, amp=amp)
+                                        fp16_train=args.fp16, amp=amp)
             if scheduler is not None:
                 if args.OPTIM.lr_scheduler == 'patience':
                     scheduler.step(score)
