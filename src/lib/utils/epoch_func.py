@@ -66,7 +66,7 @@ def train_epoch(wrappered_model, train_loader, optimizer, epoch, args, logger=No
 
     # all_logits = []
     for batch_idx, data in enumerate(train_loader):
-        iter_func(wrappered_model, data, args, meter, since)
+        iter_func(wrappered_model, data, args, meter, since, optimizer=optimizer)
         if args.LOG.train_print and (batch_idx+1) % args.LOG.train_print_iter == 0:
             # current training accuracy
             time_cur = (time.time() - iter_since)

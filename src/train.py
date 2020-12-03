@@ -24,6 +24,11 @@ from torch.optim import lr_scheduler
 from lib.utils.configuration import cfg as args
 from lib.utils.configuration import cfg_from_file, format_dict
 from lib.utils import epoch_func
+try:
+    from apex import amp
+    FP16 = True
+except ImportError:
+    FP16 = False
 
 
 def fix_seed(seed=0):
@@ -67,6 +72,8 @@ def train():
 
     make_directory(args.LOG.save_dir)
 
+    args.fp16 = args.fp16 and FP16
+
     config_file = pathlib.Path(cfg_file)
     stem = config_file.stem
     args.exp_version = stem
@@ -74,7 +81,7 @@ def train():
     parent = config_file.parent.stem
     args.exp_type = parent
 
-    args.model_save_dir = f"{args.LOG.save_dir}/{args.exp_type}/{args.exp_version}"
+    args.MODEL.save_dir = f"{args.MODEL.save_dir}/{args.exp_type}/{args.exp_version}"
 
     msglogger = logger_config.config_pylogger(
         './config/logging.conf', args.exp_version, output_dir="{}/{}".format(args.LOG.save_dir, parent))
@@ -118,6 +125,17 @@ def train():
             ), lr=args.OPTIM.lr, nesterov=True, momentum=0.9, weight_decay=5e-4)
         else:
             raise NotImplementedError
+
+        if args.fp16:
+            opt_level = 'O1'
+            if wrapper is None:
+                net, optimizer = amp.initialize(
+                    net, optimizer, opt_level=opt_level)
+            else:
+                wrapped_model, optimizer = amp.initialize(
+                    wrapper, optimizer, opt_level=opt_level)
+        if args.multi_gpus:
+            wrapper = nn.DataParallel(wrapper)
 
         if args.OPTIM.lr_scheduler == 'multi-step':
             milestones = args.OPTIM.lr_milestones
