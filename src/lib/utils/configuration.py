@@ -19,6 +19,15 @@ __C.MODEL = edict()
 __C.DATA.input_w = 0
 __C.DATA.input_h = 0
 
+__C.DATA.trn_batch_size = 100
+__C.DATA.val_batch_size = 100
+
+__C.DATA.use_weak_s_aug = False
+__C.DATA.use_strong_s_aug = False
+__C.DATA.use_c_aug = False
+
+__C.DATA.use_data_list = []
+
 __C.TRAIN.total_epoch = 100
 __C.TRAIN.start_epoch = 1
 
@@ -50,6 +59,7 @@ __C.seed = 1234
 __C.gpus = "0"
 __C.use_multi_gpu = False
 __C.is_cpu = False
+__C.fp16 = True
 __C.cuda_id = 0
 
 

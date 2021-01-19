@@ -37,6 +37,16 @@ class Dataset(torch.utils.data.Dataset):
         self.c_aug = c_aug
         self.s_aug = s_aug
 
+        self.print_("### USE COLOR AUGMENTATION ###")
+        self.print_(str(self.c_aug))
+
+        self.print_("### USE SHAPE AUGMENTATION")
+        self.print_(str(self.s_aug))
+
+        self.setup_data()
+
+        self.print_("data number: #{}".format(len(self.annotations)))
+
     def setup_data(self):
         pass
 
