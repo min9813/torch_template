@@ -16,6 +16,9 @@ __C.DATA = edict()
 __C.LOG = edict()
 __C.MODEL = edict()
 
+__C.DATA.mean = []
+__C.DATA.std = []
+
 __C.DATA.input_w = 0
 __C.DATA.input_h = 0
 
@@ -44,6 +47,7 @@ __C.OPTIM.lr_tmax = 1
 
 __C.LOG.save_dir = "../logs"
 __C.LOG.train_print_iter = 200
+__C.LOG.train_print = True
 
 __C.MODEL.save_dir = "../models"
 __C.MODEL.resume_net_path = ""

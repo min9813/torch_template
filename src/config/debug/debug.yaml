@@ -34,6 +34,7 @@ OPTIM:
 LOG:
   save_dir: ../logs
   train_print_iter: 10000
+  train_print: True
 
 MODEL:
   save_dir: ../models

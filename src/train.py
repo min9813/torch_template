@@ -23,7 +23,7 @@ import lib.network as network
 from torch.optim import lr_scheduler
 from lib.utils.configuration import cfg as args
 from lib.utils.configuration import cfg_from_file, format_dict
-from lib.utils import epoch_func
+from lib.utils import epoch_func, augmentation, image_preprocess
 try:
     from apex import amp
     FP16 = True
@@ -93,6 +93,14 @@ def train():
 
     msglogger.info("#"*30)
 
+    trans, c_aug, s_aug = augmentation.get_aug_trans(
+        use_color_aug=args.DATA.use_c_aug,
+        use_weak_shape_aug=args.DATA.use_weak_s_aug,
+        use_strong_shape_aug=args.DATA.use_strong_s_aug,
+        mean=args.DATA.mean,
+        std=args.DATA.std
+    )
+    
     """
     add dataset and data loader here
     """
@@ -190,6 +198,10 @@ def train():
                 args=args,
                 logger=trn_logger
             )
+
+            for param_group in optimizer.param_groups:
+                lr = param_group["lr"]
+                break
 
             score = val_info[args.TEST.metric_name]
             iter_end = time.time() - train_since
