@@ -113,10 +113,17 @@ def train():
             net, args.MODEL.resume_net_path, logger=msglogger)
         args.TRAIN.start_epoch = start_epoch
 
+    criterion = nn.CrossEntropyLoss()
+    wrapper = network.wrapper.LossWrap(
+        args=args,
+        model=net,
+        criterion=criterion,
+    )
+
     if args.run_mode == "test":
         pass
     elif args.run_mode == "train":
-        
+
         if args.OPTIM.optimizer == "adam":
             optimizer = torch.optim.Adam(
                 net.parameters(), lr=args.OPTIM.lr, weight_decay=5e-4)
@@ -168,7 +175,7 @@ def train():
 
         for epoch in range(args.TRAIN.start_epoch, args.TRAIN.total_epoch+1):
             trn_info = epoch_func.train_epoch(
-                wrappered_model=wrapper, 
+                wrappered_model=wrapper,
                 train_loader=train_loader,
                 optimizer=optimizer,
                 epoch=epoch,
@@ -177,7 +184,7 @@ def train():
             )
 
             val_info = epoch_func.valid_epoch(
-                wrappered_model=wrapper, 
+                wrappered_model=wrapper,
                 train_loader=valid_loader,
                 epoch=epoch,
                 args=args,
@@ -226,7 +233,7 @@ def train():
                     break
 
         msglogger.info("Best Iter = {} loss={:.4f}".format(
-            best_iter, best_score))       
+            best_iter, best_score))
 
 
 if __name__ == "__main__":

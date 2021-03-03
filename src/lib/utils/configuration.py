@@ -61,6 +61,7 @@ __C.use_multi_gpu = False
 __C.is_cpu = False
 __C.fp16 = True
 __C.cuda_id = 0
+__C.num_workers = 4
 
 
 def format_dict(cfg):
