@@ -23,7 +23,7 @@ import lib.network as network
 from torch.optim import lr_scheduler
 from lib.utils.configuration import cfg as args
 from lib.utils.configuration import cfg_from_file, format_dict
-from lib.utils import epoch_func
+from lib.utils import epoch_func, augmentation, image_preprocess
 try:
     from apex import amp
     FP16 = True
@@ -93,6 +93,14 @@ def train():
 
     msglogger.info("#"*30)
 
+    trans, c_aug, s_aug = augmentation.get_aug_trans(
+        use_color_aug=args.DATA.use_c_aug,
+        use_weak_shape_aug=args.DATA.use_weak_s_aug,
+        use_strong_shape_aug=args.DATA.use_strong_s_aug,
+        mean=args.DATA.mean,
+        std=args.DATA.std
+    )
+    
     """
     add dataset and data loader here
     """
@@ -113,10 +121,17 @@ def train():
             net, args.MODEL.resume_net_path, logger=msglogger)
         args.TRAIN.start_epoch = start_epoch
 
+    criterion = nn.CrossEntropyLoss()
+    wrapper = network.wrapper.LossWrap(
+        args=args,
+        model=net,
+        criterion=criterion,
+    )
+
     if args.run_mode == "test":
         pass
     elif args.run_mode == "train":
-        
+
         if args.OPTIM.optimizer == "adam":
             optimizer = torch.optim.Adam(
                 net.parameters(), lr=args.OPTIM.lr, weight_decay=5e-4)
@@ -168,7 +183,7 @@ def train():
 
         for epoch in range(args.TRAIN.start_epoch, args.TRAIN.total_epoch+1):
             trn_info = epoch_func.train_epoch(
-                wrappered_model=wrapper, 
+                wrappered_model=wrapper,
                 train_loader=train_loader,
                 optimizer=optimizer,
                 epoch=epoch,
@@ -177,12 +192,16 @@ def train():
             )
 
             val_info = epoch_func.valid_epoch(
-                wrappered_model=wrapper, 
+                wrappered_model=wrapper,
                 train_loader=valid_loader,
                 epoch=epoch,
                 args=args,
                 logger=trn_logger
             )
+
+            for param_group in optimizer.param_groups:
+                lr = param_group["lr"]
+                break
 
             score = val_info[args.TEST.metric_name]
             iter_end = time.time() - train_since
@@ -226,7 +245,7 @@ def train():
                     break
 
         msglogger.info("Best Iter = {} loss={:.4f}".format(
-            best_iter, best_score))       
+            best_iter, best_score))
 
 
 if __name__ == "__main__":

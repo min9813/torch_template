@@ -14,8 +14,6 @@ import numpy as np
 import torch
 import torchvision
 import lib.utils.average_meter as average_meter
-import lib.utils.simclr_utils as simclr_utils
-import lib.evaluation.few_shot_eval as few_shot_eval
 from tqdm import tqdm
 from sklearn import linear_model
 try:
