@@ -37,7 +37,8 @@ def iter_func(wrappered_model, data, args, meter, since, optimizer=None):
     since = time.time()
     output = wrappered_model(input_x)
 
-    loss, output = output
+    # loss, output = output
+    loss = output["loss-total"]
     if is_train:
         meter.add_value("time_f", time.time()-since)
         since = time.time()

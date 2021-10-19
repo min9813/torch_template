@@ -35,7 +35,7 @@ def load_model(net, path, logger=None):
         msg = str(score)
     print_(f"Best score :{score}, iter:{epoch}")
 
-    net.load_state_dict(state_dict)
+    net.load_state_dict(state_dict["net"])
 
     return net, epoch+1
 

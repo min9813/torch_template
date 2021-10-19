@@ -145,6 +145,20 @@ def _merge_a_into_b(a, b):
     for k, v in a.items():
         # a must specify keys that are in b
         if k not in b:
+            if "add_ok" in a:
+
+                pop_list = []
+                for b_key, b_value in b.items():
+                    if b_key not in a:
+                        pop_list.append(b_key)
+
+                for b_key in pop_list:
+                    b.pop(b_key)
+                if k != "add_ok":
+                    b[k] = v
+                # print(k, "continue", a)
+                
+                continue
             raise KeyError('{} is not a valid config key'.format(k))
 
         # the types must match, too
@@ -165,7 +179,8 @@ def _merge_a_into_b(a, b):
                 print(('Error under config key: {}'.format(k)))
                 raise
         else:
-            b[k] = v
+            if k != "add_ok":
+                b[k] = v
 
 
 def cfg_from_file(filename):
